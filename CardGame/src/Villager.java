@@ -8,6 +8,8 @@ public class Villager {
     int dexterity = 1;
     int stamina = 1;
     int intellect = 1;
+    final int PROFESSION_COEFFICIENT = 2;
+
     String job = "None";
 
     String name;
@@ -26,7 +28,7 @@ public class Villager {
     }
 
     public int generateHunger(){
-        return random.nextInt(4) + 2;
+        return random.nextInt(4) + 1;
     }
 
     public String getQualityString(int rarity){
@@ -63,20 +65,20 @@ public class Villager {
     private void chooseMultiplier(){
         switch(profession){
             case (0):
-                this.strength *= 1.5;
-                this.name = "Unnamed Warrior";
+                this.strength *= PROFESSION_COEFFICIENT;
+                this.name = quality + " Warrior";
                 break;
             case (1):
-                this.dexterity *= 1.5;
-                this.name = "Unnamed Farmer";
+                this.dexterity *= PROFESSION_COEFFICIENT;
+                this.name = quality + " Farmer";
                 break;
             case (2):
-                this.stamina *= 1.5;
-                this.name = "Unnamed Miner";
+                this.stamina *= PROFESSION_COEFFICIENT;
+                this.name = quality + " Miner";
                 break;
             case (3):
-                this.intellect *= 1.5;
-                this.name = "Unnamed Craftsman";
+                this.intellect *= PROFESSION_COEFFICIENT;
+                this.name = quality + " Craftsman";
                 break;
         }
     }

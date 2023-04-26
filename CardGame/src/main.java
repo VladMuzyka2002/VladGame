@@ -9,15 +9,18 @@ public class main {
 
     static Boolean isGameRunning = true;
     static Scanner myScanner = new Scanner(System.in);
-    static Player player = new Player();
+    static Party party = new Party();
     public static workStatus workstatus = new workStatus();
     public static turnManagement turns = new turnManagement();
 
     static public ArrayList<String> jobs;
+    static public ArrayList<String> stats;
 
     public static void main(String[] args){
         jobs = new ArrayList<String>();
+        stats = new ArrayList<String>();
         addJobs();
+        addStats();
         System.out.println("Type 'help' for all commands");
         while(isGameRunning){
             gameLoop();
@@ -41,16 +44,19 @@ public class main {
                 subtract(brokenCommand);
                 break;
             case "gold":
-                System.out.println("You now have " + player.getGold() + " gold");
+                System.out.println("You now have " + workstatus.getGold() + " gold");
                 break;
             case "buy":
-                player.buyVillager();
+                party.buyVillager();
+                break;
+            case "buy20":
+                party.buy20();
                 break;
             case "stats":
                 viewStats(brokenCommand);
                 break;
             case "party":
-                player.showParty();
+                party.showParty();
                 break;
             case "namechange":
                 nameChange(brokenCommand);
@@ -84,8 +90,11 @@ public class main {
             case "tutorial":
                 tutorial();
                 break;
-            case "albania":
-                System.out.println("So what about them uhh, recordings?");
+            case "sortby":
+                sortBy(brokenCommand);
+                break;
+            case "dummy":
+                dummy();
                 break;
             default:
                 System.out.println("Invalid Input");
@@ -93,12 +102,20 @@ public class main {
         }
     }
 
+    //this is a function where I test functionality of java
+    //changes frequently, but not useful to the program
+    private static void dummy() {
+        String five = "four";
+        five += ' ';
+        System.out.println(five.length());
+    }
+
     public static void add(String[] command){
         try {
             int gold = Integer.parseInt(command[1]);
-            player.addGold(gold);
+            workstatus.addGold(gold);
             System.out.println(gold +" Gold added!");
-            System.out.println("You now have " + player.getGold() + " gold!");
+            System.out.println("You now have " + workstatus.getGold() + " gold!");
         } catch (NumberFormatException nfe) {
             System.out.println("Invalid gold amount");
         }
@@ -110,9 +127,9 @@ public class main {
     public static void subtract(String[] command){
         try {
             int gold = Integer.parseInt(command[1]);
-            player.subtractGold(gold);
+            workstatus.subtractGold(gold);
             System.out.println(gold +" Gold added!");
-            System.out.println("You now have " + player.getGold() + " gold!");
+            System.out.println("You now have " + workstatus.getGold() + " gold!");
         } catch (NumberFormatException nfe) {
             System.out.println("Invalid gold amount");
         }
@@ -125,7 +142,7 @@ public class main {
     public static void viewStats(String[] command){
         try{
             int id = Integer.parseInt(command[1]);
-            if (id > 0 && id <= player.partySize() + 1) {
+            if (id > 0 && id <= party.partySize() + 1) {
                 statPrint(id);
             }
             else System.out.println("Invalid villager id.");
@@ -143,7 +160,7 @@ public class main {
         try{
             int villagerId = Integer.parseInt(command[1]);
             String newName = command[2];
-            player.getVillager(villagerId).name = newName;
+            party.getVillager(villagerId).name = newName;
         } catch (NumberFormatException nfe) {
             System.out.println("Invalid villager id");
         }
@@ -152,7 +169,7 @@ public class main {
         }
     }
     public static void statPrint(int id){
-        Villager currentVillager = player.getVillager(id);
+        Villager currentVillager = party.getVillager(id);
         System.out.println(currentVillager.name + "'s Stats");
         System.out.print("Quality: ");
         qualityColorPrint(currentVillager.quality, currentVillager.quality);
@@ -188,10 +205,37 @@ public class main {
             }
         }
     }
+
+    public static void qualityColorPrintNoNl(String quality, String text){
+        switch (quality){
+            case("Novice"): {
+                System.out.print(text);
+                break;
+            }
+            case("Proficient"): {
+                System.out.print(ANSI_BLUE + text + ANSI_RESET);
+                break;
+            }
+            case("Remarkable"): {
+                System.out.print(ANSI_RED + text + ANSI_RESET);
+                break;
+            }
+            case("Master"): {
+                System.out.print(ANSI_GREEN + text + ANSI_RESET);
+                break;
+            }
+            case("Legendary"): {
+                System.out.print(ANSI_YELLOW + text + ANSI_RESET);
+                break;
+            }
+        }
+    }
+
     public static void help(){
         System.out.println("tutorial: Goes through the tutorial");
         System.out.println("add x: Adds x amount of gold to your account *DEBUGGING*");
         System.out.println("subtract x: Removes x amount of gold from your account *DEBUGGING*");
+        System.out.println("buy20: Buys 20 villagers *DEBUGGING*");
         System.out.println("gold: Shows the amount of gold your account has");
         System.out.println("buy: Buys a new villager for 100 gold");
         System.out.println("stats x: Shows the stats of a villager with the ID of x");
@@ -200,6 +244,7 @@ public class main {
         System.out.println("employed: Shows the employed villagers");
         System.out.println("unemploy all: Unemploys all villagers");
         System.out.println("unemploy x: Unemploys villager with id x");
+        System.out.println("sortby x: Sorts all villagers by their values in stat x");
         System.out.println("namechange x y: Changes the name of a villager with ID of x to the name y");
         System.out.println("production: Shows the active work production of your villagers, and their hunger");
         System.out.println("statshelp: Shows the meaning of stats");
@@ -211,7 +256,7 @@ public class main {
         try{
             String lowerCaseJob = command[2].toLowerCase(Locale.ROOT);
             if (jobs.contains(lowerCaseJob)) {
-                workstatus.enrollVillager(player.getVillager(Integer.parseInt(command[1])), command[2]);
+                workstatus.enrollVillager(party.getVillager(Integer.parseInt(command[1])), command[2]);
             }
         } catch (NumberFormatException nfe) {
             System.out.println("Invalid input");
@@ -233,13 +278,13 @@ public class main {
 
     private static void showProduction() {
         String ANSI_STATE;
-        if (player.getHunger() > workstatus.getFood()) ANSI_STATE = ANSI_RED;
+        if (workstatus.getHunger() > workstatus.getFood()) ANSI_STATE = ANSI_RED;
         else ANSI_STATE = ANSI_GREEN;
         System.out.println("Power: " + workstatus.getPower());
         System.out.println("Food: " + workstatus.getFood());
         System.out.println("Income: " + workstatus.getGPT());
         System.out.println("Craftsmanship: " + workstatus.getCraftsmanship());
-        System.out.println(ANSI_STATE + "Hunger rate: " + player.getHunger() + ANSI_RESET);
+        System.out.println(ANSI_STATE + "Hunger rate: " + workstatus.getHunger() + ANSI_RESET);
     }
 
     private static void statsHelp() {
@@ -282,9 +327,40 @@ public class main {
         System.out.println("Each stat directly correlates to a job.");
         System.out.println("Jobs and skills are related as follows:");
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-
         statsHelp();
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         System.out.println("There will be more functionality implemented. Good luck and have fun!");
+    }
+
+    public static void sortBy(String[] command){
+        try{
+            String stat = command[1].toLowerCase(Locale.ROOT);
+            if (stats.contains(stat)) {
+                workstatus.sortByStat(stat);
+            }
+            else System.out.println("Invalid input");
+        } catch (NumberFormatException nfe) {
+            System.out.println("Invalid input");
+        }
+        catch (ArrayIndexOutOfBoundsException nfe) {
+            System.out.println("Please enter a valid stat.");
+        }
+        catch (IndexOutOfBoundsException nfe){
+            System.out.println("Please enter a valid stat.");
+        }
+    }
+
+
+    public static void addStats(){
+        stats.add("strength");
+        stats.add("dexterity");
+        stats.add("stamina");
+        stats.add("intellect");
+        stats.add("hunger");
+    }
+
+    public static String addPaddingToStrings(String string, int padding){
+        while (string.length() < padding) string += ' ';
+        return string;
     }
 }

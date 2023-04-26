@@ -8,6 +8,7 @@ public class Villager {
     int dexterity = 1;
     int stamina = 1;
     int intellect = 1;
+    int spirit = 1;
     final int PROFESSION_COEFFICIENT = 2;
 
     String job = "None";
@@ -44,7 +45,7 @@ public class Villager {
 
     private void distributeStats(int stats) {
         for (int i = stats; i > 0; i--){
-            switch (random.nextInt(4)){
+            switch (random.nextInt(5)){
                 case (0):
                     this.strength++;
                     break;
@@ -57,6 +58,8 @@ public class Villager {
                 case (3):
                     this.intellect++;
                     break;
+                case (4):
+                    this.spirit++;break;
             }
         }
         chooseMultiplier();
@@ -79,6 +82,10 @@ public class Villager {
             case (3):
                 this.intellect *= PROFESSION_COEFFICIENT;
                 this.name = quality + " Craftsman";
+                break;
+            case (4):
+                this.spirit *= PROFESSION_COEFFICIENT;
+                this.name = quality + " Prophet";
                 break;
         }
     }

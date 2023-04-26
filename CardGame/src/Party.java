@@ -33,7 +33,7 @@ public class Party {
     void showParty(){
         if (Villager.villagerQuantity == 0) System.out.println("You don't have any villagers. Buy some!");
         else {
-            for (int i = 0; ++i < Villager.villagerQuantity;) {
+            for (int i = 0; i++ < Villager.villagerQuantity;) {
                 System.out.print(getVillager(i).villagerID + 1 + "#: ");
                 main.qualityColorPrint(getVillager(i).quality, getVillager(i).name);
             }
@@ -42,7 +42,11 @@ public class Party {
 
     //for debugging
     void buy20(){
-        main.workstatus.addGold(1700);
-        for (int i = 0; i++ <= 20; buyVillager());
+        if (Villager.villagerQuantity == 0) {
+            main.workstatus.addGold(1700);
+            for (int i = 0; i++ < 20; buyVillager()) ;
+        }
+        else System.out.println("There already exist villagers.");
     }
 }
+

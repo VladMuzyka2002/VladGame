@@ -19,9 +19,12 @@ public class main {
     public static void main(String[] args){
         jobs = new ArrayList<String>();
         stats = new ArrayList<String>();
+        EventManagement.Startup();
         addJobs();
         addStats();
-        System.out.println("Type 'help' for all commands");
+        System.out.println("Welcome.");
+        System.out.println("Enter 'help' command to show all commands.");
+        System.out.println("Enter 'tutorial' command for tutorial.");
         while(isGameRunning){
             gameLoop();
         }
@@ -93,6 +96,8 @@ public class main {
             case "sortby":
                 sortBy(brokenCommand);
                 break;
+            case "maxfuture":
+                MaxFarsight();
             case "dummy":
                 dummy();
                 break;
@@ -178,6 +183,7 @@ public class main {
         System.out.println("Dexterity: " + currentVillager.dexterity);
         System.out.println("Stamina: " + currentVillager.stamina);
         System.out.println("Intellect: " + currentVillager.intellect);
+        System.out.println("Spirit: " + currentVillager.spirit);
         System.out.println("Hunger Rate: " + currentVillager.hunger);
     }
 
@@ -274,6 +280,7 @@ public class main {
         jobs.add("farmer");
         jobs.add("miner");
         jobs.add("craftsman");
+        jobs.add("prophet");
     }
 
     private static void showProduction() {
@@ -291,7 +298,8 @@ public class main {
         System.out.println("Strength: Increases combat power of your village. Good for Warriors");
         System.out.println("Dexterity: Increases farming efficiency of your village. Good for Farmers");
         System.out.println("Stamina: Increases mining efficiency of your village. Good for Miners");
-        System.out.println("Intellect: Increases crafting efficiency of your village. Good for Craftsmen");
+        System.out.println("Intellect: Increases craftsmanship of your village. Good for Craftsmen");
+        System.out.println("Spirit: Increases spirit of your village. Good for Craftsmen");
     }
 
     private static void tutorial() {
@@ -311,7 +319,7 @@ public class main {
         System.out.println("To get more villagers, you will need to buy more with gold.");
         System.out.println("Therefore, you might want to assign villagers as miners to increase gold income.");
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        System.out.println("DISCLAIMER!!!!! Warrior and Craftsmen jobs are not yet implemented");
+        System.out.println("DISCLAIMER!!!!! Warrior, Craftsmen, and Prophet jobs are not yet implemented");
         System.out.println("DISCLAIMER!!!!! Mechanics related to these jobs arent implemented either.");
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         System.out.println("With time, you will get raided by foes.");
@@ -322,6 +330,10 @@ public class main {
         System.out.println("They will be able to create equipment for your villagers to enhance their stats.");
         System.out.println("You can have one equipment equipped on each villager");
         System.out.println("Additionally, you can swap equipment on and off freely between villagers");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("You can also see the future turns with prophets.");
+        System.out.println("By assigning enough points into spirit, your prophets can yell you future events.");
+        System.out.println("This is great for predicting attack waves.");
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         System.out.println("Your villager's output from their job scales directly with their stats.");
         System.out.println("Each stat directly correlates to a job.");
@@ -356,11 +368,20 @@ public class main {
         stats.add("dexterity");
         stats.add("stamina");
         stats.add("intellect");
+        stats.add("spirit");
         stats.add("hunger");
     }
 
     public static String addPaddingToStrings(String string, int padding){
         while (string.length() < padding) string += ' ';
         return string;
+    }
+
+    public static void MaxFarsight(){
+        System.out.println("In 1 day: " + Event.futureEvents.get(0).eventType);
+        System.out.println("In 2 days: " + Event.futureEvents.get(1).eventType);
+        System.out.println("In 3 days: " + Event.futureEvents.get(2).eventType);
+        System.out.println("In 4 days: " + Event.futureEvents.get(3).eventType);
+        System.out.println("In 5 days: " + Event.futureEvents.get(4).eventType);
     }
 }

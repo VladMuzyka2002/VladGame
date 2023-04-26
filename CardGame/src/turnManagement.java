@@ -8,6 +8,7 @@ public class turnManagement {
             main.workstatus.addGold(main.workstatus.getGPT());
             turnCount++;
             System.out.println("Turn " + turnCount + " ~~~~~ You have " + main.workstatus.getGold() + " gold!");
+            EventManagement.processEvent();
         }
         else System.out.println("Not enough food, change your villagers' jobs!");
     }

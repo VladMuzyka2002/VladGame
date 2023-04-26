@@ -7,6 +7,7 @@ public class workStatus {
     private int food;
     private int power;
     private int craftsmanship;
+    private int faith;
     private int gold;
     private int hunger;
 
@@ -18,6 +19,7 @@ public class workStatus {
         food = 5;
         power = 5;
         craftsmanship = 5;
+        faith = 5;
         gold = 300;
         hunger = 0;
     }
@@ -91,6 +93,14 @@ public class workStatus {
         this.craftsmanship = craftsmanship;
     }
 
+    int getFaith(){
+        return this.craftsmanship;
+    }
+
+    void setFaith(int faith){
+        this.faith = faith;
+    }
+
     void enrollVillager(Villager villager, String job){
         removeWorker(villager);
         addWorker(villager, job);
@@ -111,6 +121,9 @@ public class workStatus {
             case("craftsman"):
                 this.craftsmanship -= villager.intellect;
                 break;
+            case("prophet"):
+                this.faith -= villager.spirit;
+                break;
         }
     }
 
@@ -128,6 +141,9 @@ public class workStatus {
                 break;
             case("craftsman"):
                 this.craftsmanship += villager.intellect;
+                break;
+            case("prophet"):
+                this.faith += villager.spirit;
                 break;
         }
         villager.job = job.substring(0, 1).toUpperCase() + job.substring(1);;
@@ -204,6 +220,10 @@ public class workStatus {
                 intellectCase(b, i, copyOfVillagers, sortedVillagers, max, maxidReal,maxidTemp);
                 break;
 
+            case "spirit":
+                spiritCase(b, i, copyOfVillagers, sortedVillagers, max, maxidReal,maxidTemp);
+                break;
+
             case "hunger":
                 hungerCase(b, i, copyOfVillagers, sortedVillagers, max, maxidReal,maxidTemp);
                 break;
@@ -258,6 +278,18 @@ public class workStatus {
         copyOfVillagers.remove(maxidTemp);
     }
 
+    private void spiritCase(int b, int i, List<Villager> copyOfVillagers, List<Integer> sortedVillagers, int max, int maxidReal, int maxidTemp){
+        for (b = -1; b++ < Villager.villagerQuantity - i; ) {
+            if (copyOfVillagers.get(b).spirit > max) {
+                max = copyOfVillagers.get(b).spirit;
+                maxidReal = copyOfVillagers.get(b).villagerID;
+                maxidTemp = b;
+            }
+        }
+        sortedVillagers.add(main.party.villagersList.get(maxidReal).villagerID);
+        copyOfVillagers.remove(maxidTemp);
+    }
+
     private void hungerCase(int b, int i, List<Villager> copyOfVillagers, List<Integer> sortedVillagers, int max, int maxidReal, int maxidTemp){
         for (b = -1; b++ < Villager.villagerQuantity - i; ) {
             if (copyOfVillagers.get(b).hunger > max) {
@@ -294,6 +326,9 @@ public class workStatus {
                 break;
             case "intellect":
                 System.out.print("Intellect: " + main.addPaddingToStrings(Integer.toString(villager.intellect), 2));
+                break;
+            case "spirit":
+                System.out.print("Spirit: " + main.addPaddingToStrings(Integer.toString(villager.spirit), 2));
                 break;
             case "hunger":
                 System.out.print("Hunger:    " + main.addPaddingToStrings(Integer.toString(villager.hunger), 2));

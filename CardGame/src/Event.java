@@ -4,7 +4,7 @@ public class Event {
 
     static List<Event> futureEvents = new ArrayList<Event>(5);
     public String eventType;
-    private int brawlPower;
+    int brawlPower;
 
     public static void createEvent(){
         Random random = new Random();
@@ -34,8 +34,5 @@ public class Event {
         else event.eventType = "Peaceful day";
     }
 
-    public void Event(String eventType){
-        this.eventType = eventType;
-    }
-
+    public Event getEvent(){return futureEvents.get(0);}
 }

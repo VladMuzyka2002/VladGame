@@ -28,6 +28,12 @@ public class EventManagement {
                 if (event == "Attack") System.out.print("attacked! ");
                 else System.out.print("raided!!! ");
                 System.out.println("Defend yourself!!!");
+                System.out.println("Enemy power: " + Event.futureEvents.get(0).brawlPower);
+                if (Event.futureEvents.get(0).brawlPower > main.workstatus.getPower()){
+                    System.out.println("You were defeated and lost " + main.workstatus.getGold() + " gold!");
+                    main.workstatus.setGold(0);
+                }
+                else System.out.println("You have successfully repelled the attackers!");
                 break;
         }
     }

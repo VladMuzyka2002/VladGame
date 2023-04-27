@@ -34,8 +34,22 @@ public class Party {
         if (Villager.villagerQuantity == 0) System.out.println("You don't have any villagers. Buy some!");
         else {
             for (int i = 0; i++ < Villager.villagerQuantity;) {
-                System.out.print(getVillager(i).villagerID + 1 + "#: ");
-                main.qualityColorPrint(getVillager(i).quality, getVillager(i).name);
+                System.out.print(main.addPaddingToStrings(Integer.toString(i) + "#:", 4));
+                main.qualityColorPrintNoNl(getVillager(i).quality, main.addPaddingToStrings(getVillager(i).name, 20));
+                System.out.print(" | ");
+                System.out.print("Strength: " + main.addPaddingToStrings(Integer.toString(getVillager(i).strength), 2));
+                System.out.print(" | ");
+                System.out.print("Dexterity: " + main.addPaddingToStrings(Integer.toString(getVillager(i).dexterity), 2));
+                System.out.print(" | ");
+                System.out.print("Stamina: " + main.addPaddingToStrings(Integer.toString(getVillager(i).stamina), 2));
+                System.out.print(" | ");
+                System.out.print("Intellect: " + main.addPaddingToStrings(Integer.toString(getVillager(i).intellect), 2));
+                System.out.print(" | ");
+                System.out.print("Spirit: " + main.addPaddingToStrings(Integer.toString(getVillager(i).spirit), 2));
+                System.out.print(" | ");
+                System.out.print("Hunger: " + getVillager(i).hunger);
+                System.out.print("   |   ");
+                System.out.println("Employment: " + main.addPaddingToStrings(getVillager(i).job, 2));
             }
         }
     }

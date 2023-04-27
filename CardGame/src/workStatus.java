@@ -94,7 +94,7 @@ public class workStatus {
     }
 
     int getFaith(){
-        return this.craftsmanship;
+        return this.faith;
     }
 
     void setFaith(int faith){

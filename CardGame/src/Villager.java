@@ -81,7 +81,8 @@ public class Villager {
                 break;
             case (3):
                 this.intellect *= PROFESSION_COEFFICIENT;
-                this.name = quality + " Craftsman";
+                if (random.nextInt(2) == 0) this.name = quality + " Engineer";
+                else this.name = quality + " Craftsman";
                 break;
             case (4):
                 this.spirit *= PROFESSION_COEFFICIENT;

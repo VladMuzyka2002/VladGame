@@ -113,8 +113,17 @@ public class main {
             case "maxfuture":
                 MaxFarsight();
                 break;
+            case "craft":
+                craftItem(brokenCommand);
+                break;
+            case "development":
+                development();
+                break;
             case "dummy":
                 dummy();
+                break;
+            case "dummy2":
+                dummy2(brokenCommand);
                 break;
             default:
                 System.out.println("Invalid Input");
@@ -122,13 +131,71 @@ public class main {
         }
     }
 
+    private static void craftItem(String[] command){
+        try{
+            Equipment.createEquipment(Integer.parseInt(command[1]));
+        }
+        catch (NumberFormatException nfe) {
+            System.out.println("Please enter an id of a valid recipe.");
+        }
+            catch (ArrayIndexOutOfBoundsException nfe) {
+            System.out.println("Please enter an id of a valid recipe.");
+        }
+            catch (IndexOutOfBoundsException nfe){
+            System.out.println("Please enter an id of a valid recipe.");
+        }
+    }
+
+    private static void development() {
+        System.out.println("Craftsmanship: " + workstatus.getCraftsmanship() + ", Accumulated Craftsmanship: " + turnManagement.accumulatedCraftsmanship);
+        System.out.println("Ingenuity: " + workstatus.getIngenuity() + ", Accumulated Ingenuity: " + turnManagement.accumulatedIngenuity);
+        System.out.println();
+        if (Equipment.inDevelopment == null) System.out.println("Nothing is being developed right now.");
+        else {
+            System.out.println(Equipment.inDevelopment.name + " is being developed right now.");
+            showRecipeStats(Equipment.inDevelopment);
+        }
+
+    }
+
+    private static void showRecipeStats(Equipment item) {
+        equipmentType recipe = equipmentType.knownRecipes.get(item.recipeID);
+        System.out.println("Recipe ID: " + item.recipeID);
+        System.out.print("Rarity: ");
+        qualityColorPrintEquipment(item.rarity, item.rarity);
+        System.out.println("Item Stats: ");
+
+        if (recipe.maxstr != 0){System.out.println("Strength: " + recipe.str + " - " + recipe.maxstr);}
+        else{System.out.println("Strength: " + recipe.str);}
+
+        if (recipe.maxdex != 0){System.out.println("Dexterity: " + recipe.dex + " - " + recipe.maxdex);}
+        else{System.out.println("Strength: " + recipe.dex);}
+
+        if (recipe.maxstam != 0){System.out.println("Stamina " + recipe.stam + " - " + recipe.maxstam);}
+        else{System.out.println("Stamina: " + recipe.stam);}
+
+        if (recipe.maxintt != 0){System.out.println("Intellect: " + recipe.intt + " - " + recipe.maxintt);}
+        else{System.out.println("Intellect: " + recipe.intt);}
+
+        if (recipe.maxspir != 0){System.out.println("Spirit: " + recipe.spir + " - " + recipe.maxspir);}
+        else{System.out.println("Spirit: " + recipe.spir);}
+
+
+    }
+
 
     //this is a function where I test functionality of java
     //changes frequently, but not useful to the program
     private static void dummy() {
-        String five = "four";
-        five += ' ';
-        System.out.println(five.length());
+        Equipment.discoverEquipment();
+
+        List<Equipment> z = Equipment.Equipment;
+        System.out.println(Materials.materials.get(0).quantity);
+        System.out.println(equipmentType.knownRecipes);
+    }
+
+    private static void dummy2(String[] command){
+        Equipment.createEquipment(Integer.parseInt(command[1]));
     }
 
     public static void add(String[] command){
@@ -228,6 +295,31 @@ public class main {
         }
     }
 
+    public static void qualityColorPrintEquipment(String quality, String text){
+        switch (quality){
+            case("Basic"): {
+                System.out.println(text);
+                break;
+            }
+            case("Simple"): {
+                System.out.println(ANSI_BLUE + text + ANSI_RESET);
+                break;
+            }
+            case("Durable"): {
+                System.out.println(ANSI_RED + text + ANSI_RESET);
+                break;
+            }
+            case("Advanced"): {
+                System.out.println(ANSI_GREEN + text + ANSI_RESET);
+                break;
+            }
+            case("Grandiose"): {
+                System.out.println(ANSI_YELLOW + text + ANSI_RESET);
+                break;
+            }
+        }
+    }
+
     public static void qualityColorPrintNoNl(String quality, String text){
         switch (quality){
             case("Novice"): {
@@ -298,6 +390,7 @@ public class main {
         jobs.add("miner");
         jobs.add("craftsman");
         jobs.add("prophet");
+        jobs.add("engineer");
     }
 
     private static void showProduction() {
@@ -309,6 +402,7 @@ public class main {
         System.out.println("Income: " + workstatus.getGPT());
         System.out.println("Craftsmanship: " + workstatus.getCraftsmanship());
         System.out.println("Faith: " + workstatus.getFaith());
+        System.out.println("Ingenuity: " + workstatus.getIngenuity());
         System.out.println(ANSI_STATE + "Hunger rate: " + workstatus.getHunger() + ANSI_RESET);
     }
 
@@ -316,7 +410,7 @@ public class main {
         System.out.println("Strength: Increases combat power of your village. Good for Warriors");
         System.out.println("Dexterity: Increases farming efficiency of your village. Good for Farmers");
         System.out.println("Stamina: Increases mining efficiency of your village. Good for Miners");
-        System.out.println("Intellect: Increases craftsmanship of your village. Good for Craftsmen");
+        System.out.println("Intellect: Increases craftsmanship and ingenuity of your village. Good for Craftsmen and Engineers.");
         System.out.println("Spirit: Increases spirit of your village. Good for Craftsmen\n");
         System.out.println("Power: Total strength generated by employed warriors");
         System.out.println("Farming rating: Total dexterity generated by employed farmers");

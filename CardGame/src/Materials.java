@@ -3,7 +3,7 @@ import java.util.List;
 
 public class Materials {
     public static List<Materials> materials = new ArrayList<Materials>(14);
-
+    public int quantity;
     int id;
     String name;
     String rarity;
@@ -29,5 +29,6 @@ public class Materials {
         this.id = id;
         this.name = name;
         this.rarity = rarity;
+        this.quantity = 20;
     }
 }

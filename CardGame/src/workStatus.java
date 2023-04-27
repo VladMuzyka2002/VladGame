@@ -10,6 +10,7 @@ public class workStatus {
     private int faith;
     private int gold;
     private int hunger;
+    private int ingenuity;
 
     private List<Villager> activeVillagers = new ArrayList<Villager>(20);
     private static int workingVillagers = 0;
@@ -20,6 +21,7 @@ public class workStatus {
         power = 5;
         craftsmanship = 5;
         faith = 5;
+        ingenuity = 5;
         gold = 300;
         hunger = 0;
     }
@@ -101,6 +103,14 @@ public class workStatus {
         this.faith = faith;
     }
 
+    int getIngenuity(){
+        return this.ingenuity;
+    }
+
+    void setIngenuity(int ingenuity){
+        this.ingenuity = faith;
+    }
+
     void enrollVillager(Villager villager, String job){
         removeWorker(villager);
         addWorker(villager, job);
@@ -124,6 +134,9 @@ public class workStatus {
             case("prophet"):
                 this.faith -= villager.spirit;
                 break;
+            case("engineer"):
+                this.ingenuity -= villager.intellect;
+                break;
         }
     }
 
@@ -144,6 +157,9 @@ public class workStatus {
                 break;
             case("prophet"):
                 this.faith += villager.spirit;
+                break;
+            case("engineer"):
+                this.ingenuity += villager.intellect;
                 break;
         }
         villager.job = job.substring(0, 1).toUpperCase() + job.substring(1);;

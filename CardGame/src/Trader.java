@@ -61,8 +61,9 @@ public class Trader {
         }
         isExit.set(false);
         while (!isExit.get()) {
+            System.out.println("Would you  like to purchase something?");
             System.out.println("Please enter a command");
-            System.out.println("~~~~~~~~~~~~~~~~~~~~~~");
+            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             String userCommand = main.myScanner.nextLine();
             processPurchase(userCommand);
         }

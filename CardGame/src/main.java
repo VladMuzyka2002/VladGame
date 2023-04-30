@@ -147,9 +147,33 @@ public class main {
             case "equip":
                 equip(brokenCommand);
                 break;
+            case "cancelcraft":
+            case "stopcraft":
+                stopcraft();
+                break;
             default:
                 System.out.println("Invalid Input");
                 break;
+        }
+    }
+
+    private static void stopcraft() {
+        System.out.print("You are currently crafting ");
+        qualityColorPrintEquipment(Equipment.inDevelopment.rarity, Equipment.inDevelopment.name);
+        System.out.print("Progress: ");
+        System.out.println(turnManagement.accumulatedCraftsmanship + " / " + turnManagement.rarityWeight(Equipment.inDevelopment.rarity));
+        while (true){
+            System.out.println("Are you sure you want to stop crafting this item? Invested materials will be lost. (Yes/No)");
+            String userCommand = myScanner.nextLine();
+            if (userCommand.toLowerCase(Locale.ROOT).equals("yes")) {
+                Equipment.inDevelopment = null;
+                turnManagement.accumulatedCraftsmanship = 0;
+                break;
+            }
+            else if (userCommand.toLowerCase(Locale.ROOT).equals("no")){
+                System.out.println("Creation proceeding");
+                break;
+            }
         }
     }
 
@@ -184,8 +208,13 @@ public class main {
 
     private static void craftItem(String[] command){
         try{
-            Equipment.createEquipment(Integer.parseInt(command[1]) - 1);
-            System.out.println("Creating " + Equipment.inDevelopment.name);
+            if (Equipment.inDevelopment == null) {
+                Equipment.createEquipment(Integer.parseInt(command[1]) - 1);
+                System.out.print("Creating ");
+                main.qualityColorPrintEquipment(Equipment.inDevelopment.rarity, Equipment.inDevelopment.name);
+            }
+            else System.out.println("Already crafting ");
+            main.qualityColorPrintEquipment(Equipment.inDevelopment.rarity, Equipment.inDevelopment.name);
         }
         catch (NumberFormatException nfe) {
             System.out.println("Please enter an id of a valid recipe.");
@@ -501,6 +530,8 @@ public class main {
         System.out.println("Crafting Commands");
         System.out.println("development: Shows crafting and research stats, and shows which item is currently being crafted");
         System.out.println("craft x: Crafts item with recipe id x if needed materials are present");
+        System.out.println("stopcraft: Cancels currently crafted item");
+        System.out.println("cancelcraft: Cancels currently crafted item");
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         System.out.println("Item Commands");
         System.out.println("equipment: Shows items that you have crafted");

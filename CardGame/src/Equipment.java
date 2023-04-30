@@ -4,7 +4,7 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Equipment {
-    static List<Equipment> Equipment = new ArrayList<Equipment>(20);
+    static List<Equipment> Equipment = new ArrayList<Equipment>(50);
     static Equipment inDevelopment = null;
     String name;
     String rarity;
@@ -32,7 +32,7 @@ public class Equipment {
 
     public static void discoverEquipment(){
         Random random = new Random();
-        int rarity = random.nextInt(101);
+        int rarity = random.nextInt(100);
         try {
             if (rarity < 50) {
                 int equipmentID = random.nextInt(11);

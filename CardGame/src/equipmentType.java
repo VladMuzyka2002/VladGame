@@ -30,7 +30,7 @@ public class equipmentType {
         this.name = name;
         this.rarity = rarity;
         this.id = id;
-        this.id = idlocal;
+        this.idlocal = idlocal;
         this.str = str;
         this.dex = dex;
         this.stam = stam;

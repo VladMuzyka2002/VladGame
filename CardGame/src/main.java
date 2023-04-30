@@ -1,5 +1,6 @@
 import javax.swing.plaf.BorderUIResource;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class main {
     public static final String ANSI_RESET = "\u001B[0m";
@@ -13,29 +14,31 @@ public class main {
     static Party party = new Party();
     public static workStatus workstatus = new workStatus();
     public static turnManagement turns = new turnManagement();
+    static Villager emptyVillager;
+    static Equipment emptyEquipment;
+    static AtomicBoolean isTraderPresent = new AtomicBoolean(true);
 
     static public ArrayList<String> jobs;
     static public ArrayList<String> stats;
 
+
     public static void main(String[] args){
         jobs = new ArrayList<String>();
         stats = new ArrayList<String>();
+        Materials.generateMaterials();
         EventManagement.Startup();
+        turnManagement.trader = new Trader();
         addJobs();
         addStats();
-        Materials.generateMaterials();
         equipmentType.generateEquipmentTypes();
-
-        List<equipmentType> a = equipmentType.knownRecipes;
-        List<equipmentType> b = equipmentType.Simples;
-        List<equipmentType> c = equipmentType.Durables;
-        List<equipmentType> d = equipmentType.Advanceds;
-        List<equipmentType> e = equipmentType.Grandioses;
-        List<Materials> f = Materials.materials;
+        emptyVillager = new Villager(0, 0, 0);
+        emptyEquipment = new Equipment("None", "Basic", 0,0, 0, 0, 0, 0, 0);
+        emptyVillager.name = "None";
 
         System.out.println("Welcome.");
         System.out.println("Enter 'help' command to show all commands.");
         System.out.println("Enter 'tutorial' command for tutorial.");
+        System.out.println("Talk to the trader while he's still here to get going.");
         while(isGameRunning){
             gameLoop();
         }
@@ -60,8 +63,11 @@ public class main {
             case "gold":
                 System.out.println("You now have " + workstatus.getGold() + " gold");
                 break;
-            case "buy":
-                party.buyVillager();
+            case "shop":
+                if (isTraderPresent.get()) {
+                    turnManagement.trader.shop();
+                }
+                else System.out.println("Trader isn't here.");
                 break;
             case "buy20":
                 party.buy20();
@@ -125,42 +131,93 @@ public class main {
             case "dummy2":
                 dummy2(brokenCommand);
                 break;
+            case "equipment":
+            case "items":
+                Equipment.printEquipment();
+                break;
+            case "recipes":
+                Equipment.printRecipes();
+                break;
+            case "materials":
+                Materials.printMaterials();
+                break;
+            case "unequip":
+                remove(brokenCommand);
+                break;
+            case "equip":
+                equip(brokenCommand);
+                break;
             default:
                 System.out.println("Invalid Input");
                 break;
         }
     }
 
+    private static void remove(String[] command) {
+        try{
+            Villager.equipVillager(party.getVillager(Integer.parseInt(command[1])), emptyEquipment);
+        } catch (NumberFormatException nfe) {
+            System.out.println("Invalid Input");
+        }
+        catch (ArrayIndexOutOfBoundsException nfe) {
+            System.out.println("Invalid villager and/or item.");
+        }
+        catch (IndexOutOfBoundsException nfe){
+            System.out.println("Invalid villager and/or item.");
+        }
+    }
+
+    private static void equip(String[] command) {
+        try{
+            Villager.equipVillager(party.getVillager(Integer.parseInt(command[1])), Equipment.Equipment.get(Integer.parseInt(command[2]) - 1));
+        } catch (NumberFormatException nfe) {
+            System.out.println("Invalid Input");
+        }
+        catch (ArrayIndexOutOfBoundsException nfe) {
+            System.out.println("Invalid villager and/or item.");
+        }
+        catch (IndexOutOfBoundsException nfe){
+            System.out.println("Invalid villager and/or item.");
+        }
+
+    }
+
     private static void craftItem(String[] command){
         try{
-            Equipment.createEquipment(Integer.parseInt(command[1]));
+            Equipment.createEquipment(Integer.parseInt(command[1]) - 1);
+            System.out.println("Creating " + Equipment.inDevelopment.name);
         }
         catch (NumberFormatException nfe) {
             System.out.println("Please enter an id of a valid recipe.");
         }
-            catch (ArrayIndexOutOfBoundsException nfe) {
+        catch (ArrayIndexOutOfBoundsException nfe) {
             System.out.println("Please enter an id of a valid recipe.");
         }
-            catch (IndexOutOfBoundsException nfe){
+        catch (IndexOutOfBoundsException nfe){
             System.out.println("Please enter an id of a valid recipe.");
+        }
+        catch (NullPointerException nfe){
+
         }
     }
 
     private static void development() {
-        System.out.println("Craftsmanship: " + workstatus.getCraftsmanship() + ", Accumulated Craftsmanship: " + turnManagement.accumulatedCraftsmanship);
-        System.out.println("Ingenuity: " + workstatus.getIngenuity() + ", Accumulated Ingenuity: " + turnManagement.accumulatedIngenuity);
+        System.out.println("Craftsmanship per Turn: " + workstatus.getCraftsmanship());
+        System.out.println("Ingenuity per Turn: " + workstatus.getIngenuity());
+        System.out.println("Next research progress: " + turnManagement.accumulatedIngenuity + " / 400");
         System.out.println();
         if (Equipment.inDevelopment == null) System.out.println("Nothing is being developed right now.");
         else {
             System.out.println(Equipment.inDevelopment.name + " is being developed right now.");
-            showRecipeStats(Equipment.inDevelopment);
+            System.out.println("Crafting Progress: " + turnManagement.accumulatedCraftsmanship + " / " + turnManagement.rarityWeight(Equipment.inDevelopment.rarity));
+            showRecipeStatsNoMats(Equipment.inDevelopment);
         }
 
     }
 
     private static void showRecipeStats(Equipment item) {
         equipmentType recipe = equipmentType.knownRecipes.get(item.recipeID);
-        System.out.println("Recipe ID: " + item.recipeID);
+        System.out.println("Recipe ID: " + item.recipeID + 1);
         System.out.print("Rarity: ");
         qualityColorPrintEquipment(item.rarity, item.rarity);
         System.out.println("Item Stats: ");
@@ -169,7 +226,7 @@ public class main {
         else{System.out.println("Strength: " + recipe.str);}
 
         if (recipe.maxdex != 0){System.out.println("Dexterity: " + recipe.dex + " - " + recipe.maxdex);}
-        else{System.out.println("Strength: " + recipe.dex);}
+        else{System.out.println("Dexterity: " + recipe.dex);}
 
         if (recipe.maxstam != 0){System.out.println("Stamina " + recipe.stam + " - " + recipe.maxstam);}
         else{System.out.println("Stamina: " + recipe.stam);}
@@ -180,9 +237,32 @@ public class main {
         if (recipe.maxspir != 0){System.out.println("Spirit: " + recipe.spir + " - " + recipe.maxspir);}
         else{System.out.println("Spirit: " + recipe.spir);}
 
-
+        System.out.println("\nMaterials required:");
+        recipe.mats.forEach(materials -> {qualityColorPrintEquipment(materials.rarity, materials.name);});
     }
 
+    private static void showRecipeStatsNoMats(Equipment item) {
+        equipmentType recipe = equipmentType.knownRecipes.get(item.recipeID);
+        System.out.println("Recipe ID: " + Integer.toString(item.recipeID + 1));
+        System.out.print("Rarity: ");
+        qualityColorPrintEquipment(item.rarity, item.rarity);
+        System.out.println("Item Stats: ");
+
+        if (recipe.maxstr != 0){System.out.println("Strength: " + recipe.str + " - " + recipe.maxstr);}
+        else{System.out.println("Strength: " + recipe.str);}
+
+        if (recipe.maxdex != 0){System.out.println("Dexterity: " + recipe.dex + " - " + recipe.maxdex);}
+        else{System.out.println("Dexterity: " + recipe.dex);}
+
+        if (recipe.maxstam != 0){System.out.println("Stamina " + recipe.stam + " - " + recipe.maxstam);}
+        else{System.out.println("Stamina: " + recipe.stam);}
+
+        if (recipe.maxintt != 0){System.out.println("Intellect: " + recipe.intt + " - " + recipe.maxintt);}
+        else{System.out.println("Intellect: " + recipe.intt);}
+
+        if (recipe.maxspir != 0){System.out.println("Spirit: " + recipe.spir + " - " + recipe.maxspir);}
+        else{System.out.println("Spirit: " + recipe.spir);}
+    }
 
     //this is a function where I test functionality of java
     //changes frequently, but not useful to the program
@@ -195,7 +275,7 @@ public class main {
     }
 
     private static void dummy2(String[] command){
-        Equipment.createEquipment(Integer.parseInt(command[1]));
+        Equipment.createEquipment(Integer.parseInt(command[1]) - 1);
     }
 
     public static void add(String[] command){
@@ -226,7 +306,6 @@ public class main {
         }
     }
 
-
     public static void viewStats(String[] command){
         try{
             int id = Integer.parseInt(command[1]);
@@ -244,6 +323,7 @@ public class main {
             System.out.println("Please enter an id of an existing villager.");
         }
     }
+
     public static void nameChange(String[] command){
         try{
             int villagerId = Integer.parseInt(command[1]);
@@ -256,9 +336,28 @@ public class main {
             System.out.println("Please enter an id of an existing villager.");
         }
     }
+
     public static void statPrint(int id){
+        statPrintNew(id);
+        Villager currentVillager = party.getVillager(id);
+        System.out.print("Equipped item: ");
+        qualityColorPrintEquipmentNoNl(currentVillager.equipment.rarity, currentVillager.equipment.name);
+        System.out.println();
+        if (currentVillager.equipment.name != "None"){
+            System.out.println("~~~~~~~~~~~~~~~~~~");
+            System.out.println("Item Stats:");
+            System.out.println("Strength: " + currentVillager.equipment.str);
+            System.out.println("Dexterity: " + currentVillager.equipment.dex);
+            System.out.println("Stamina: " + currentVillager.equipment.stam);
+            System.out.println("Intellect " + currentVillager.equipment.intt);
+            System.out.println("Spirit: " + currentVillager.equipment.spir);
+        }
+    }
+
+    public static void statPrintNew(int id){
         Villager currentVillager = party.getVillager(id);
         System.out.println(currentVillager.name + "'s Stats");
+        System.out.println("ID: " + Integer.toString(currentVillager.villagerID + 1));
         System.out.print("Quality: ");
         qualityColorPrint(currentVillager.quality, currentVillager.quality);
         System.out.println("Job: " + currentVillager.job);
@@ -320,6 +419,31 @@ public class main {
         }
     }
 
+    public static void qualityColorPrintEquipmentNoNl(String quality, String text){
+        switch (quality){
+            case("Basic"): {
+                System.out.print(text);
+                break;
+            }
+            case("Simple"): {
+                System.out.print(ANSI_BLUE + text + ANSI_RESET);
+                break;
+            }
+            case("Durable"): {
+                System.out.print(ANSI_RED + text + ANSI_RESET);
+                break;
+            }
+            case("Advanced"): {
+                System.out.print(ANSI_GREEN + text + ANSI_RESET);
+                break;
+            }
+            case("Grandiose"): {
+                System.out.print(ANSI_YELLOW + text + ANSI_RESET);
+                break;
+            }
+        }
+    }
+
     public static void qualityColorPrintNoNl(String quality, String text){
         switch (quality){
             case("Novice"): {
@@ -346,25 +470,56 @@ public class main {
     }
 
     public static void help(){
+        System.out.println("Debugging Commands, don't use while doing normal play-through");
         System.out.println("add x: Adds x amount of gold to your account *DEBUGGING*");
         System.out.println("subtract x: Removes x amount of gold from your account *DEBUGGING*");
         System.out.println("buy20: Buys 20 villagers *DEBUGGING*");
+        System.out.println("dummy: Completes a random research *DEBUGGING*");
+        System.out.println("dummy2 x: Creates item with x id, only works when code is adjusted *DEBUGGING*");
+        System.out.println("maxfuture: Sees 5 turns into the future *DEBUGGING*");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("General Commands");
+        System.out.println("help: Lists available commands");
         System.out.println("tutorial: Goes through the tutorial");
+        System.out.println("statshelp: Shows the meaning of stats");
         System.out.println("gold: Shows the amount of gold your account has");
-        System.out.println("buy: Buys a new villager for 100 gold");
+        System.out.println("shop: Accesses the shop if the trader is present");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("Villager Commands");
         System.out.println("stats x: Shows the stats of a villager with the ID of x");
         System.out.println("party: Shows your villager party and their ID's");
+        System.out.println("sortby x: Sorts all villagers by their values in stat x");
+        System.out.println("namechange x y: Changes the name of a villager with ID of x to the name y");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("Job Commands");
         System.out.println("employ x y: Employs villager x with job y");
         System.out.println("employed: Shows the employed villagers");
         System.out.println("unemploy all: Unemploys all villagers");
         System.out.println("unemploy x: Unemploys villager with id x");
-        System.out.println("future x: Reveals upcoming events depending on the amount of Faith you have");
-        System.out.println("sortby x: Sorts all villagers by their values in stat x");
-        System.out.println("namechange x y: Changes the name of a villager with ID of x to the name y");
         System.out.println("production: Shows the active work production of your villagers, and their hunger");
-        System.out.println("statshelp: Shows the meaning of stats");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("Crafting Commands");
+        System.out.println("development: Shows crafting and research stats, and shows which item is currently being crafted");
+        System.out.println("craft x: Crafts item with recipe id x if needed materials are present");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("Item Commands");
+        System.out.println("equipment: Shows items that you have crafted");
+        System.out.println("items: Shows items that you have crafted");
+        System.out.println("recipes: Shows available recipes");
+        System.out.println("materials: Shows your materials");
+        System.out.println("equip x y: Equips villager id x with item id y");
+        System.out.println("unequip x: Unequips villager id x off his gear");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("Turn Commands");
+        System.out.println("future: Reveals upcoming events depending on the amount of Faith you have");
         System.out.println("next: Enters next year, and gives you your gold income.");
         System.out.println("over: Signals that you give up, ends the game");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("Shop Commands *Accessible only in shop*");
+        System.out.println("villager: Buys a villager");
+        System.out.println("x: Buys material with id x");
+        System.out.println("gold: Shows the amount of gold your account has");
+        System.out.println("exit: Exits shop");
     }
 
     public static void enrollVillager(String[] command){
@@ -411,53 +566,73 @@ public class main {
         System.out.println("Dexterity: Increases farming efficiency of your village. Good for Farmers");
         System.out.println("Stamina: Increases mining efficiency of your village. Good for Miners");
         System.out.println("Intellect: Increases craftsmanship and ingenuity of your village. Good for Craftsmen and Engineers.");
-        System.out.println("Spirit: Increases spirit of your village. Good for Craftsmen\n");
-        System.out.println("Power: Total strength generated by employed warriors");
-        System.out.println("Farming rating: Total dexterity generated by employed farmers");
-        System.out.println("Gold per Turn: Total stamina generated by employed miners");
-        System.out.println("Craftsmanship: Total intellect generated by employed craftsmen");
+        System.out.println("Spirit: Increases spirit of your village. Good for Prophets\n");
+        System.out.println("Power: Total strength generated by employed warriors, used for fighting attackers");
+        System.out.println("Farming rating: Total dexterity generated by employed farmers, used for feeding villagers");
+        System.out.println("Income: Total stamina generated by employed miners, generates gold");
+        System.out.println("Craftsmanship: Total intellect generated by employed craftsmen, accelerates crafting of items");
         System.out.println("Faith: Total spirit generated by employed prophets");
+        System.out.println("Ingenuity: Total intellect generated by employed engineers, accelerates research of recipes");
     }
 
     private static void tutorial() {
-        System.out.println("The point of the game is to last for as many years as you can without collapse.");
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        System.out.println("You start with 300 gold. With it, you can buy villagers to work on your village.");
-        System.out.println("Each villager costs 100 gold, you can buy them with the command 'buy'.");
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("The point of the game is to make your village grow and defeat powerful enemies.");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("You start with 400 gold. With it, you can buy villagers to work on your village.");
+        System.out.println("To buy villagers, enter command 'shop', and then enter command 'villager'.");
+        System.out.println("Villager costs starts at 100 gold, each villager costs 20% more than last.");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         System.out.println("Each villager has a hunger stat, and needs food to operate.");
-        System.out.println("To move on to the next year, you need to make sure that your food production");
-        System.out.println("is no less than the combined hunger of all villagers.");
+        System.out.println("To move on to the next day, you need to make sure that your food production is no less");
+        System.out.println("than the combined hunger of all villagers.");
         System.out.println("To get food, you need to assign villagers to be farmers.");
         System.out.println("To do so, use the 'employ' command.");
         System.out.println("For command formatting, make sure to refer to the 'help' command.");
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         System.out.println("With more time, you will need more people to work on your village.");
         System.out.println("To get more villagers, you will need to buy more with gold.");
         System.out.println("Therefore, you might want to assign villagers as miners to increase gold income.");
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        System.out.println("DISCLAIMER!!!!! Craftsman job is not yet implemented");
-        System.out.println("DISCLAIMER!!!!! Mechanics related to this job arent implemented either.");
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         System.out.println("With time, you will get raided by foes.");
         System.out.println("You will need to assign villagers to be warriors to protect your village.");
-        System.out.println("A lack of power from your warriors will result in villagers being killed.");
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        System.out.println("If you have expendable workforce, you can employ your villagers as craftsmen.");
-        System.out.println("They will be able to create equipment for your villagers to enhance their stats.");
-        System.out.println("You can have one equipment equipped on each villager");
-        System.out.println("Additionally, you can swap equipment on and off freely between villagers");
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("A lack of power from your warriors will result you being robbed.");
+        System.out.println("Successful defence grants you a random material.");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("Items give your villagers additional stats.");
+        System.out.println("One villager can equip only one item at a time.");
+        System.out.println("One item can be equipped by only one villager at a time.");
+        System.out.println("To get items, you must craft them using craftsmen.");
+        System.out.println("If you have a recipe and appropriate materials, you can craft an item.");
+        System.out.println("Craftsmen give craftsmanship, are more efficient with higher intellect.");
+        System.out.println("To craft, use command 'craft'.");
+        System.out.println("Every turn, if you are crafting an item you accumulate craftsmanship");
+        System.out.println("Once you reach a proper threshold, your item is crafted.");
+        System.out.println("You can access your progress using 'development' command.");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("To gain more recipes, you must research them with ingenuity.");
+        System.out.println("Ingenuity is earned by engineers every turn.");
+        System.out.println("Engineers are more efficient with higher intellect.");
+        System.out.println("Once you reach 400 ingenuity, you have a chance to unlock a new recipe.");
+        System.out.println("At start, you are guaranteed to earn a new recipe, but with each unlock the odds lower.");
+        System.out.println("You can access your progress using 'development' command.");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         System.out.println("You can also see the future turns with prophets.");
         System.out.println("By assigning enough points into spirit, your prophets can yell you future events.");
         System.out.println("This is great for predicting attack waves.");
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("At the start of every turn, you see a turn into the future for every 20 faith");
+        System.out.println("Prophets generate faith for every spirit point prophets have.");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         System.out.println("Your villager's output from their job scales directly with their stats.");
         System.out.println("Each stat directly correlates to a job.");
         System.out.println("Jobs and skills are related as follows:");
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         statsHelp();
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("Every few turns, you will be visited by a traveling wanderer.");
+        System.out.println("When such happens, you can use 'shop' command to access his shop.");
+        System.out.println("There, you can buy more villagers and materials.");
+        System.out.println("Refer to 'help' for shop commands.");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         System.out.println("There will be more functionality implemented. Good luck and have fun!");
     }
 
@@ -465,14 +640,15 @@ public class main {
         try{
             String stat = command[1].toLowerCase(Locale.ROOT);
             if (stats.contains(stat)) {
-                workstatus.sortByStat(stat);
+                if (command[2].equals("villager")) workstatus.sortByStat(stat);
+                else if (command[2].equals("equipment") || command[2].equals("item")) Equipment.sortByStat(stat);
             }
             else System.out.println("Invalid input");
         } catch (NumberFormatException nfe) {
             System.out.println("Invalid input");
         }
         catch (ArrayIndexOutOfBoundsException nfe) {
-            System.out.println("Please enter a valid stat.");
+            System.out.println("Please enter a valid stat and target type.");
         }
         catch (IndexOutOfBoundsException nfe){
             System.out.println("Please enter a valid stat.");
@@ -494,7 +670,7 @@ public class main {
         return string;
     }
 
-    private static void farsight() {
+    public static void farsight() {
         boolean canSee = true;
         int id = 0;
         int turnNum;

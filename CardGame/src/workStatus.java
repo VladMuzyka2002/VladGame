@@ -22,7 +22,7 @@ public class workStatus {
         craftsmanship = 5;
         faith = 5;
         ingenuity = 5;
-        gold = 300;
+        gold = 400;
         hunger = 0;
     }
 
@@ -32,8 +32,6 @@ public class workStatus {
 
     void setGold(int value) {
         this.gold = value;
-        System.out.println("Successfully set gold!");
-        System.out.println("You now have " + this.gold + " gold!");
     }
 
     void raiseHunger(int hunger){
@@ -43,6 +41,7 @@ public class workStatus {
     void addGold(int value){
         this.gold+= value;
     }
+
 
     void subtractGold(int value){
         if (this.gold < value){
@@ -62,6 +61,8 @@ public class workStatus {
     int getFood(){
         return this.food;
     }
+
+    void setFood(int food){this.food = food;}
 
     void raiseFood(int food){
         this.food += food;
@@ -121,21 +122,27 @@ public class workStatus {
         switch(villager.job.toLowerCase(Locale.ROOT)){
             case("warrior"):
                 this.power -= villager.strength;
+                this.power -= villager.equipment.str;
                 break;
             case("farmer"):
                 this.food -= villager.dexterity;
+                this.food -= villager.equipment.dex;
                 break;
             case("miner"):
                 this.goldPerTurn -= villager.stamina;
+                this.goldPerTurn -= villager.equipment.stam;
                 break;
             case("craftsman"):
                 this.craftsmanship -= villager.intellect;
+                this.craftsmanship -= villager.equipment.intt;
                 break;
             case("prophet"):
                 this.faith -= villager.spirit;
+                this.faith -= villager.equipment.spir;
                 break;
             case("engineer"):
                 this.ingenuity -= villager.intellect;
+                this.ingenuity -= villager.equipment.intt;
                 break;
         }
     }
@@ -145,21 +152,27 @@ public class workStatus {
         switch(job.toLowerCase(Locale.ROOT)){
             case("warrior"):
                 this.power += villager.strength;
+                this.power += villager.equipment.str;
                 break;
             case("farmer"):
                 this.food += villager.dexterity;
+                this.food += villager.equipment.dex;
                 break;
             case("miner"):
                 this.goldPerTurn += villager.stamina;
+                this.goldPerTurn += villager.equipment.stam;
                 break;
             case("craftsman"):
                 this.craftsmanship += villager.intellect;
+                this.craftsmanship += villager.equipment.intt;
                 break;
             case("prophet"):
                 this.faith += villager.spirit;
+                this.faith += villager.equipment.spir;
                 break;
             case("engineer"):
                 this.ingenuity += villager.intellect;
+                this.ingenuity += villager.equipment.intt;
                 break;
         }
         villager.job = job.substring(0, 1).toUpperCase() + job.substring(1);;

@@ -14,7 +14,7 @@ public class Party {
             main.workstatus.subtractGold(100);
             generateVillager genVil = new generateVillager();
             genVil.generateVillager();
-            main.statPrint(Villager.villagerQuantity);
+            main.statPrintNew(Villager.villagerQuantity);
         }
     }
 
@@ -49,7 +49,11 @@ public class Party {
                 System.out.print(" | ");
                 System.out.print("Hunger: " + getVillager(i).hunger);
                 System.out.print("   |   ");
-                System.out.println("Employment: " + main.addPaddingToStrings(getVillager(i).job, 2));
+                System.out.print("Employment: " + main.addPaddingToStrings(getVillager(i).job, 10));
+                System.out.print("   |   ");
+                System.out.print("Equipment: ");
+                main.qualityColorPrintEquipment(getVillager(i).equipment.rarity, getVillager(i).equipment.name);
+                System.out.println(" ");
             }
         }
     }

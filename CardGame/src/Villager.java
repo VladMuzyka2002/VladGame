@@ -9,6 +9,7 @@ public class Villager {
     int stamina = 1;
     int intellect = 1;
     int spirit = 1;
+    Equipment equipment;
     final int PROFESSION_COEFFICIENT = 2;
 
     String job = "None";
@@ -21,6 +22,7 @@ public class Villager {
     Random random = new Random();
 
     public Villager(int statTotal, int profession, int rarity){
+        equipment = main.emptyEquipment;
         villagerID = villagerQuantity;
         this.profession = profession;
         hunger = generateHunger();
@@ -29,7 +31,7 @@ public class Villager {
     }
 
     public int generateHunger(){
-        return random.nextInt(4) + 1;
+        return random.nextInt(3) + 1;
     }
 
     public String getQualityString(int rarity){
@@ -93,5 +95,46 @@ public class Villager {
 
     public int getID(){
         return villagerID;
+    }
+
+    static public void equipVillager(Villager villager, Equipment item){
+        Equipment oldItem = villager.equipment;
+        Equipment newItem = item;
+
+        if (item.Owner.name != "None"){
+            main.emptyEquipment.Owner = new Villager(0, 0, 0);
+            main.emptyEquipment.Owner.name = "None";
+            equipVillager(main.party.villagersList.get(item.Owner.villagerID), main.emptyEquipment);
+        }
+
+        villager.equipment = newItem;
+        item.Owner = villager;
+
+        swapItemType(villager, oldItem, newItem, villager.job);
+
+
+    }
+
+    private static void swapItemType(Villager villager, Equipment oldItem, Equipment newItem, String job) {
+        switch (job){
+            case "Warrior":
+                main.workstatus.setPower(main.workstatus.getPower() - oldItem.str + newItem.str);
+                break;
+            case "Farmer":
+                main.workstatus.setFood(main.workstatus.getFood() - oldItem.dex + newItem.dex);
+                break;
+            case "Miner":
+                main.workstatus.setGPT(main.workstatus.getGPT() - oldItem.stam + newItem.stam);
+                break;
+            case "Prophet":
+                main.workstatus.setFaith(main.workstatus.getFaith() - oldItem.spir + newItem.spir);
+                break;
+            case "Craftsman":
+                main.workstatus.setCraftsmanship(main.workstatus.getCraftsmanship() - oldItem.intt + newItem.intt);
+                break;
+            case "Engineer":
+                main.workstatus.setIngenuity(main.workstatus.getIngenuity() - oldItem.intt + newItem.intt);
+                break;
+        }
     }
 }

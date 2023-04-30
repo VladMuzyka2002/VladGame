@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class Materials {
     public static List<Materials> materials = new ArrayList<Materials>(14);
@@ -29,6 +30,31 @@ public class Materials {
         this.id = id;
         this.name = name;
         this.rarity = rarity;
-        this.quantity = 20;
+        this.quantity = 0;
+    }
+
+    static public void printMaterials(){
+        materials.forEach(materials -> {
+            main.qualityColorPrintEquipmentNoNl(materials.rarity, materials.name);
+            System.out.println(": " + materials.quantity);
+        });
+    }
+
+    public static Materials addMaterial() {
+        int materialID = generateRandomMaterialID();
+        materials.get(materialID).quantity++;
+        return materials.get(materialID);
+    }
+
+    public static int generateRandomMaterialID(){
+        Random random = new Random();
+        int materialID = 0;
+        int rarity = random.nextInt(100);
+        if (rarity < 50) { materialID = random.nextInt(2);}
+        else if (rarity < 75) { materialID = random.nextInt(3) + 2;}
+        else if (rarity < 90) { materialID = random.nextInt(3) + 5;}
+        else if (rarity < 99) { materialID = random.nextInt(3) + 8;}
+        else materialID = random.nextInt(3) + 11;
+        return materialID;
     }
 }

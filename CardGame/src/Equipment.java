@@ -99,8 +99,8 @@ public class Equipment {
         else{itemSpir = equipmentType.knownRecipes.get(id).spir;}
 
 
-        //Equipment.add(new Equipment(itemName, itemRarity, itemID, itemStr, itemDex, itemStam, itemInt, itemSpir, id));
-        inDevelopment = new Equipment(itemName, itemRarity, itemID, itemStr, itemDex, itemStam, itemInt, itemSpir, id);
+        Equipment.add(new Equipment(itemName, itemRarity, itemID, itemStr, itemDex, itemStam, itemInt, itemSpir, id));
+        //inDevelopment = new Equipment(itemName, itemRarity, itemID, itemStr, itemDex, itemStam, itemInt, itemSpir, id);
     }
 
 

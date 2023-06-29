@@ -30,7 +30,7 @@ public class Materials {
         this.id = id;
         this.name = name;
         this.rarity = rarity;
-        this.quantity = 20;
+        this.quantity = 0;
     }
 
     static public void printMaterials(){

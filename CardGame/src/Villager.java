@@ -105,12 +105,17 @@ public class Villager {
             main.emptyEquipment.Owner = new Villager(0, 0, 0);
             main.emptyEquipment.Owner.name = "None";
             equipVillager(main.party.villagersList.get(item.Owner.villagerID), main.emptyEquipment);
+            villager.equipment = newItem;
+            item.Owner = villager;
+
+            swapItemType(villager, main.emptyEquipment, newItem, villager.job);
         }
+        else {
+            villager.equipment = newItem;
+            item.Owner = villager;
 
-        villager.equipment = newItem;
-        item.Owner = villager;
-
-        swapItemType(villager, oldItem, newItem, villager.job);
+            swapItemType(villager, oldItem, newItem, villager.job);
+        }
 
 
     }

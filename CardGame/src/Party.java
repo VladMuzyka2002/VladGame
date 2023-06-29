@@ -67,4 +67,3 @@ public class Party {
         else System.out.println("There already exist villagers.");
     }
 }
-

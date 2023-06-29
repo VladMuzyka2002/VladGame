@@ -45,9 +45,9 @@ public class EventManagement {
                     System.out.println("You have successfully repelled the attackers!");
                     int fivtyfivty = random.nextInt(2);
                     //if (fivtyfivty == 0){
-                        Materials mat = Materials.addMaterial();
-                        System.out.print("You have received ");
-                        main.qualityColorPrintEquipment(mat.rarity, mat.name);
+                    Materials mat = Materials.addMaterial();
+                    System.out.print("You have received ");
+                    main.qualityColorPrintEquipment(mat.rarity, mat.name);
                     //}
                 }
                 break;
